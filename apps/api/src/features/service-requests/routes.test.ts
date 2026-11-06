@@ -1,9 +1,17 @@
-import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
+import {
+  describe,
+  expect,
+  it,
+  beforeEach,
+  afterEach,
+  afterAll,
+  vi,
+} from 'vitest';
 import request from 'supertest';
 import { app } from '../../app.js';
 
 import { eq } from 'drizzle-orm';
-import { db } from '../../db/index.js';
+import { db, pool } from '../../db/index.js';
 import { serviceRequests } from '../../db/schema.js';
 
 describe('POST /api/requests', () => {
@@ -84,6 +92,10 @@ afterEach(async () => {
   await db.delete(serviceRequests);
 });
 
+afterAll(async () => {
+  await pool.end();
+});
+
 describe('GET /api/requests', () => {
   it('returns the latest 50 requests, newest first', async () => {
     const fixtures = Array.from({ length: 51 }, (_, index) => ({
@@ -151,6 +163,14 @@ it.each([
       description: '   ',
     },
   },
+  {
+    scenario: 'description longer than 2000 characters',
+    body: {
+      customerName: 'Alex Example',
+      title: 'Printer repair',
+      description: 'A'.repeat(2001),
+    },
+  },
 ])('returns 400 for $scenario', async ({ body }) => {
   const response = await request(app).post('/api/requests').send(body);
 
@@ -163,6 +183,7 @@ it.each([
 });
 
 it('returns a safe error when the database insert fails', async () => {
+  const logSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
   const insertSpy = vi.spyOn(db, 'insert').mockImplementation(() => {
     throw new Error('Simulated internal database failure');
   });
@@ -179,12 +200,19 @@ it('returns a safe error when the database insert fails', async () => {
     expect(response.body).toEqual({
       error: 'Unable to create service request',
     });
+    expect(logSpy).toHaveBeenCalledTimes(1);
+    expect(logSpy).toHaveBeenCalledWith(
+      'Service request database operation failed',
+      { operation: 'create' },
+    );
   } finally {
     insertSpy.mockRestore();
+    logSpy.mockRestore();
   }
 });
 
 it('returns a safe error when the database query fails', async () => {
+  const logSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
   const selectSpy = vi.spyOn(db, 'select').mockImplementation(() => {
     throw new Error('Simulated internal database failure');
   });
@@ -197,8 +225,14 @@ it('returns a safe error when the database query fails', async () => {
     expect(response.body).toEqual({
       error: 'Unable to retrieve service requests',
     });
+    expect(logSpy).toHaveBeenCalledTimes(1);
+    expect(logSpy).toHaveBeenCalledWith(
+      'Service request database operation failed',
+      { operation: 'list' },
+    );
   } finally {
     selectSpy.mockRestore();
+    logSpy.mockRestore();
   }
 });
 

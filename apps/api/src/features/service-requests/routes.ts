@@ -28,6 +28,9 @@ requestsRouter.post('/', async (req, res) => {
 
     res.status(201).json(request);
   } catch {
+    console.error('Service request database operation failed', {
+      operation: 'create',
+    });
     res.status(500).json({
       error: 'Unable to create service request',
     });
@@ -44,6 +47,9 @@ requestsRouter.get('/', async (req, res) => {
 
     res.status(200).json(requests);
   } catch {
+    console.error('Service request database operation failed', {
+      operation: 'list',
+    });
     res.status(500).json({
       error: 'Unable to retrieve service requests',
     });
