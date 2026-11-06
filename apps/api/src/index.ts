@@ -1,14 +1,7 @@
-import express from 'express';
+import { app } from './app.js';
 
-const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = Number(process.env.PORT || 4000);
 
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'ok',
-  });
-});
-
-app.listen(PORT, () => {
-  console.log(`Server is listening on port ${PORT}`);
+app.listen(PORT, '127.0.0.1', () => {
+  console.log(`Server is listening at http://127.0.0.1:${PORT}`);
 });

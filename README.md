@@ -153,6 +153,53 @@ Restart it with `docker compose up -d db`. You can also use `docker compose down
 
 PostgreSQL initialization settings apply when the data volume is first created. Changing the user, password, or database name in `.env` later does not update an existing database automatically.
 
+## API Tests
+
+Tests use Vitest and Supertest with a separate PostgreSQL database named `serviceops_test`. Use fictional customer data only. Run these commands from the repository root after installing dependencies and completing the environment setup above.
+
+### 1. Start PostgreSQL
+
+```bash
+docker compose up -d db
+docker compose ps
+```
+
+Wait until the `db` service shows `healthy`.
+
+### 2. Create the test database
+
+Run this once per PostgreSQL data volume:
+
+```bash
+docker compose exec db sh -c 'createdb -U "$POSTGRES_USER" serviceops_test'
+```
+
+If `serviceops_test` already exists, skip this step.
+
+### 3. Configure the test connection
+
+Set `TEST_DATABASE_URL` in the root `.env`. Copy your working `DATABASE_URL` and change only the database name from `serviceops_dev` to `serviceops_test`, keeping the same credentials, host, and port. Keep the development `DATABASE_URL` unchanged.
+
+Vitest uses `TEST_DATABASE_URL` as the application's `DATABASE_URL` during tests. The test configuration checks that the selected database is named `serviceops_test`.
+
+### 4. Apply migrations to the test database
+
+```bash
+pnpm --filter @repo/api exec drizzle-kit migrate --config=drizzle.test.config.ts
+```
+
+This applies the existing migrations to the test database. No separate test migrations need to be generated.
+
+### 5. Run the tests
+
+```bash
+pnpm --filter @repo/api test
+```
+
+The development API does not need to be running; Supertest starts the Express app on a temporary port. PostgreSQL must remain running.
+
+Service request tests clear the `service_requests` table in the test database before and after each test. Never point test configuration at a database containing data you need to keep.
+
 ## Project Status
 
 🚧 **Under active development**
