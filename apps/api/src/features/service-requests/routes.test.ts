@@ -1,17 +1,9 @@
-import {
-  describe,
-  expect,
-  it,
-  afterAll,
-  beforeEach,
-  afterEach,
-  vi,
-} from 'vitest';
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
 import request from 'supertest';
 import { app } from '../../app.js';
 
 import { eq } from 'drizzle-orm';
-import { db, pool } from '../../db/index.js';
+import { db } from '../../db/index.js';
 import { serviceRequests } from '../../db/schema.js';
 
 describe('POST /api/requests', () => {
