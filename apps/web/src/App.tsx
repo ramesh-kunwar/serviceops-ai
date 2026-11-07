@@ -1,4 +1,5 @@
 import ServiceRequestForm from './features/service-requests/ServiceRequestForm';
+import ServiceRequestList from './features/service-requests/ServiceRequestList';
 
 function App() {
   return (
@@ -21,6 +22,9 @@ function App() {
       </header>
 
       <main className="mx-auto max-w-xl px-5 py-10 sm:px-6 sm:py-16">
+        <div className="mt-10">
+          <ServiceRequestList />
+        </div>
         <div className="mb-7">
           <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-500">
             We're here to help

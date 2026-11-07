@@ -1,6 +1,7 @@
 import { useId, useState, type SubmitEvent } from 'react';
 import { z } from 'zod';
 import { createServiceRequestSchema } from './validation';
+import { ApiError, createServiceRequest } from './api';
 
 type ServiceRequestInput = z.input<typeof createServiceRequestSchema>;
 
@@ -67,34 +68,29 @@ export default function ServiceRequestForm() {
     setSubmissionStatus('submitting');
 
     try {
-      const response = await fetch('/api/requests', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(result.data),
-      });
-
-      if (!response.ok) {
-        setSubmissionError(
-          response.status === 400
-            ? 'The server rejected your request. Please review your entries and try again.'
-            : 'The server couldn’t process your request. Your entries are still here. Please try again later.',
-        );
-        setSubmissionStatus('error');
-        setToastVisible(true);
-        return;
-      }
+      await createServiceRequest(result.data);
 
       setCustomerName('');
       setTitle('');
       setDescription('');
       setSubmissionStatus('success');
       setToastVisible(true);
-    } catch {
-      setSubmissionError(
-        'A network error interrupted your submission. Your entries are still here. Check whether your request was received before trying again.',
-      );
+    } catch (error) {
+      if (error instanceof ApiError && error.kind === 'http') {
+        setSubmissionError(
+          error.status === 400
+            ? 'The server rejected your request. Please review your entries and try again.'
+            : 'The server couldn’t process your request. Your entries are still here. Please try again later.',
+        );
+      } else if (error instanceof ApiError && error.kind === 'network') {
+        setSubmissionError(
+          'A network error interrupted your submission. Your entries are still here. Check whether your request was received before trying again.',
+        );
+      } else {
+        setSubmissionError(
+          'We couldn’t read the submission confirmation. Your entries are still here. Check whether your request was received before trying again.',
+        );
+      }
       setSubmissionStatus('error');
       setToastVisible(true);
     }
