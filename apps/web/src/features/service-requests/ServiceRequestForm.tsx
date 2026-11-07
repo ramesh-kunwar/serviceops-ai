@@ -17,6 +17,7 @@ export default function ServiceRequestForm() {
     'idle' | 'submitting' | 'success' | 'error'
   >('idle');
   const [toastVisible, setToastVisible] = useState(false);
+  const [submissionError, setSubmissionError] = useState('');
   const isSubmitting = submissionStatus === 'submitting';
 
   const [validationError, setValidationError] =
@@ -25,6 +26,20 @@ export default function ServiceRequestForm() {
   const errors = validationError
     ? z.flattenError(validationError).fieldErrors
     : {};
+
+  function revalidateField(field: keyof ServiceRequestInput, value: string) {
+    // Once errors are visible, keep them in sync as the user corrects values.
+    if (!validationError) return;
+
+    const result = createServiceRequestSchema.safeParse({
+      customerName,
+      title,
+      description,
+      [field]: value,
+    });
+
+    setValidationError(result.success ? null : result.error);
+  }
 
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -35,6 +50,7 @@ export default function ServiceRequestForm() {
 
     setSubmissionStatus('idle');
     setToastVisible(false);
+    setSubmissionError('');
 
     const result = createServiceRequestSchema.safeParse({
       customerName,
@@ -60,12 +76,25 @@ export default function ServiceRequestForm() {
       });
 
       if (!response.ok) {
-        throw new Error('Service request submission failed');
+        setSubmissionError(
+          response.status === 400
+            ? 'The server rejected your request. Please review your entries and try again.'
+            : 'The server couldn’t process your request. Your entries are still here. Please try again later.',
+        );
+        setSubmissionStatus('error');
+        setToastVisible(true);
+        return;
       }
 
+      setCustomerName('');
+      setTitle('');
+      setDescription('');
       setSubmissionStatus('success');
       setToastVisible(true);
     } catch {
+      setSubmissionError(
+        'A network error interrupted your submission. Your entries are still here. Check whether your request was received before trying again.',
+      );
       setSubmissionStatus('error');
       setToastVisible(true);
     }
@@ -91,7 +120,10 @@ export default function ServiceRequestForm() {
             required
             disabled={isSubmitting}
             value={customerName}
-            onChange={(event) => setCustomerName(event.target.value)}
+            onChange={(event) => {
+              setCustomerName(event.target.value);
+              revalidateField('customerName', event.target.value);
+            }}
             aria-invalid={Boolean(errors.customerName?.length)}
             aria-describedby={
               errors.customerName?.length
@@ -123,7 +155,10 @@ export default function ServiceRequestForm() {
             required
             disabled={isSubmitting}
             value={title}
-            onChange={(event) => setTitle(event.target.value)}
+            onChange={(event) => {
+              setTitle(event.target.value);
+              revalidateField('title', event.target.value);
+            }}
             aria-invalid={Boolean(errors.title?.length)}
             aria-describedby={
               errors.title?.length ? `${formId}-title-error` : undefined
@@ -156,7 +191,10 @@ export default function ServiceRequestForm() {
             required
             disabled={isSubmitting}
             value={description}
-            onChange={(event) => setDescription(event.target.value)}
+            onChange={(event) => {
+              setDescription(event.target.value);
+              revalidateField('description', event.target.value);
+            }}
             aria-invalid={Boolean(errors.description?.length)}
             aria-describedby={
               errors.description?.length
@@ -276,8 +314,7 @@ export default function ServiceRequestForm() {
                 Unable to submit
               </p>
               <p className="mt-1 text-xs leading-5 text-slate-600">
-                We couldn’t confirm your submission. Your entries are still
-                here. Please check your connection before trying again.
+                {submissionError}
               </p>
             </div>
             <button
