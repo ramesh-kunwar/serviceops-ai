@@ -10,7 +10,7 @@ Future capabilities will include intelligent automation, AI-assisted decision-ma
 
 - **Monorepo:** Turborepo + pnpm
 - **Backend:** Node.js, Express.js, TypeScript
-- **Frontend (Planned):** React + TypeScript
+- **Frontend:** React + Vite + TypeScript + Tailwind CSS
 - **Database:** PostgreSQL + Drizzle ORM
 - **AI Integration:** Planned
 
@@ -25,6 +25,7 @@ The project is in its initial development stage.
 - TypeScript configuration
 - `GET /health` API endpoint
 - Local PostgreSQL setup with Docker Compose and Drizzle migrations
+- React frontend in `apps/web` with a basic ServiceOps AI homepage
 
 ## Getting Started
 
@@ -71,6 +72,45 @@ Expected response:
   "status": "ok"
 }
 ```
+
+## Frontend
+
+The ServiceOps AI frontend uses React, Vite, TypeScript, and Tailwind CSS.
+Its source code lives in `apps/web`, which is included in the pnpm workspace.
+
+Run these commands from the repository root.
+
+### Install dependencies
+
+```bash
+pnpm install
+```
+
+### Start the development server
+
+```bash
+pnpm --dir apps/web dev
+```
+
+Open the local URL printed in the terminal.
+
+### Build for production
+
+```bash
+pnpm --dir apps/web build
+```
+
+This checks TypeScript and generates production files in `apps/web/dist`.
+
+### Preview the production build
+
+After building, run:
+
+```bash
+pnpm --dir apps/web preview
+```
+
+Open the local URL printed in the terminal.
 
 ## Local Database Setup
 
