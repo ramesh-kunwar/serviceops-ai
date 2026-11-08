@@ -5,10 +5,14 @@ import { ApiError, createServiceRequest } from './api';
 
 type ServiceRequestInput = z.input<typeof createServiceRequestSchema>;
 
+type Props = {
+  onSuccess?: () => void;
+};
+
 const fieldClassName =
   'mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-xs outline-none transition-colors placeholder:text-slate-400 hover:border-slate-400 focus-visible:border-indigo-600 focus-visible:ring-2 focus-visible:ring-indigo-600/20 aria-invalid:border-red-500 aria-invalid:focus-visible:ring-red-500/20 disabled:cursor-wait disabled:bg-slate-50 disabled:text-slate-500';
 
-export default function ServiceRequestForm() {
+export default function ServiceRequestForm({ onSuccess }: Props) {
   const formId = useId();
   const [customerName, setCustomerName] = useState('');
   const [title, setTitle] = useState('');
@@ -75,6 +79,7 @@ export default function ServiceRequestForm() {
       setDescription('');
       setSubmissionStatus('success');
       setToastVisible(true);
+      onSuccess?.();
     } catch (error) {
       if (error instanceof ApiError && error.kind === 'http') {
         setSubmissionError(

@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 import { getServiceRequests, type ServiceRequest } from './api';
 
-export default function ServiceRequestList() {
+type Props = {
+  refreshCount?: number;
+};
+
+export default function ServiceRequestList({ refreshCount = 0 }: Props) {
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -10,6 +14,9 @@ export default function ServiceRequestList() {
     const controller = new AbortController();
 
     async function loadRequests() {
+      setIsLoading(true);
+      setError(null);
+
       try {
         const data = await getServiceRequests({
           signal: controller.signal,
@@ -34,7 +41,7 @@ export default function ServiceRequestList() {
     return () => {
       controller.abort();
     };
-  }, []);
+  }, [refreshCount]);
 
   return (
     <section aria-labelledby="service-requests-heading">
