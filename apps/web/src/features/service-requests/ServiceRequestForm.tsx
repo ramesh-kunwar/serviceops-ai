@@ -113,7 +113,7 @@ export default function ServiceRequestForm({ onSuccess }: Props) {
           </label>
           <input
             className={fieldClassName}
-            placeholder="Your full name"
+            placeholder="Demo Customer"
             id={`${formId}-customerName`}
             name="customerName"
             type="text"
@@ -149,7 +149,7 @@ export default function ServiceRequestForm({ onSuccess }: Props) {
           </label>
           <input
             className={fieldClassName}
-            placeholder="A short summary of the issue"
+            placeholder="A short summary of a fictional issue"
             id={`${formId}-title`}
             name="title"
             type="text"
@@ -185,7 +185,7 @@ export default function ServiceRequestForm({ onSuccess }: Props) {
           </label>
           <textarea
             className={`${fieldClassName} min-h-36 resize-y`}
-            placeholder="What happened, and how can we help?"
+            placeholder="Describe a made-up issue using fictional details only."
             id={`${formId}-description`}
             name="description"
             rows={5}

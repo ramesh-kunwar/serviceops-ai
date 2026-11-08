@@ -25,7 +25,18 @@ The project is in its initial development stage.
 - TypeScript configuration
 - `GET /health` API endpoint
 - Local PostgreSQL setup with Docker Compose and Drizzle migrations
-- React frontend in `apps/web` with a basic ServiceOps AI homepage
+- React frontend in `apps/web` with a validated service request form and submission feedback
+- Request list showing the latest 50 requests, newest first, with title, description, customer name, status, and creation time
+- Loading, empty, and error states for the request list; automatic refetch after a successful submission
+- Frontend tests for the API client, form, list, and submission-to-list refresh flow
+
+### Demo scope and data
+
+This is a **local-only demo for one fictional organization**. Use fictional customer names and request details only; never enter real personal, customer, or confidential information. Submitted requests are saved in the local development database and displayed in the shared request list.
+
+The **customer submission form and operations request list are temporarily combined on the same page** to demonstrate the end-to-end workflow. Separate customer and operations views, authentication, authorization, and tenant isolation are not implemented. This shared page is not a private customer portal.
+
+The UI displays a demo notice and fictional examples; free-text inputs cannot verify whether information is fictional. Keep the frontend and API local. Do not publicly expose the unauthenticated request submission or listing endpoints. Any hosted demo must restrict access at the hosting/network layer. See [the MVP design](docs/MVP_DESIGN.md) for the intended scope.
 
 ## Getting Started
 
@@ -93,6 +104,43 @@ pnpm --dir apps/web dev
 ```
 
 Open the local URL printed in the terminal.
+
+For the request form and list to work, complete the local database setup below, apply migrations, and run the API in a second terminal:
+
+```bash
+pnpm --filter @repo/api dev
+```
+
+Vite proxies `/api` requests to `http://127.0.0.1:4000`. The list loads on page entry and refetches after the form successfully saves a request; no browser refresh is needed. Failed submissions preserve the entered values and do not trigger a list refresh.
+
+### Frontend tests and checks
+
+Run the full frontend test suite once:
+
+```bash
+pnpm --dir apps/web test
+```
+
+Run only the request-list tests:
+
+```bash
+pnpm --dir apps/web exec vitest run src/features/service-requests/ServiceRequestList.test.tsx
+```
+
+Run tests in watch mode:
+
+```bash
+pnpm --dir apps/web exec vitest
+```
+
+Frontend tests use Vitest, React Testing Library, and jsdom with mocked network responses and fictional fixtures. They do not require the API or PostgreSQL to be running. `App.test.tsx` covers the successful submission-to-list refresh flow and failure handling.
+
+Check types and lint:
+
+```bash
+pnpm --dir apps/web check-types
+pnpm --dir apps/web lint
+```
 
 ### Build for production
 
