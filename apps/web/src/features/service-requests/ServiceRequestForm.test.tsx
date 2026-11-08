@@ -3,6 +3,15 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, expect, it, vi } from 'vitest';
 import ServiceRequestForm from './ServiceRequestForm';
 
+const savedRequest = {
+  id: 'b21992fa-5374-456b-bb2b-7d259c522dd4',
+  customerName: 'Alex Example',
+  title: 'Broken air conditioner',
+  description: 'The air conditioner is not cooling.',
+  status: 'NEW',
+  createdAt: '2026-11-07T00:00:00.000Z',
+};
+
 afterEach(() => {
   vi.unstubAllGlobals();
 });
@@ -41,6 +50,11 @@ it.each([
     failure: 'a network failure',
     status: null,
     message: /A network error interrupted your submission/,
+  },
+  {
+    failure: 'an unreadable confirmation',
+    status: 201,
+    message: /We couldn’t read the submission confirmation/,
   },
 ])('explains $failure and preserves input', async ({ status, message }) => {
   const user = userEvent.setup();
@@ -96,7 +110,7 @@ it('sends validated data and displays a success message', async () => {
   const fetchMock = vi
     .fn()
     .mockResolvedValue(
-      new Response(JSON.stringify({ id: 1 }), { status: 201 }),
+      new Response(JSON.stringify(savedRequest), { status: 201 }),
     );
 
   vi.stubGlobal('fetch', fetchMock);
@@ -209,7 +223,7 @@ it('disables submission while the request is processing', async () => {
 
   expect(fetchMock).toHaveBeenCalledTimes(1);
 
-  resolveRequest(new Response(null, { status: 201 }));
+  resolveRequest(new Response(JSON.stringify(savedRequest), { status: 201 }));
 
   expect(await screen.findByText('Request submitted')).toBeInTheDocument();
 

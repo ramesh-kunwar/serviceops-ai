@@ -1,6 +1,10 @@
+import { useState } from 'react';
 import ServiceRequestForm from './features/service-requests/ServiceRequestForm';
+import ServiceRequestList from './features/service-requests/ServiceRequestList';
 
 function App() {
+  const [refreshCount, setRefreshCount] = useState(0);
+
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 antialiased">
       <header className="border-b border-slate-200 bg-white">
@@ -21,6 +25,9 @@ function App() {
       </header>
 
       <main className="mx-auto max-w-xl px-5 py-10 sm:px-6 sm:py-16">
+        <div className="mt-10">
+          <ServiceRequestList refreshCount={refreshCount} />
+        </div>
         <div className="mb-7">
           <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-500">
             We're here to help
@@ -49,7 +56,9 @@ function App() {
               All fields are required.
             </p>
           </div>
-          <ServiceRequestForm />
+          <ServiceRequestForm
+            onSuccess={() => setRefreshCount((count) => count + 1)}
+          />
         </section>
 
         <p className="mt-6 text-center text-xs leading-5 text-slate-500">
