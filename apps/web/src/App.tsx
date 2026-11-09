@@ -25,6 +25,21 @@ function App() {
       </header>
 
       <main className="mx-auto max-w-xl px-5 py-10 sm:px-6 sm:py-16">
+        <aside
+          aria-label="Demo notice"
+          className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950"
+        >
+          <p className="font-semibold">Fictional demo data only</p>
+          <p className="mt-1">
+            Use made-up customer names and request details. Do not enter real
+            personal or confidential information.
+          </p>
+          <p className="mt-2">
+            The customer form and operations request list are temporarily
+            combined on this page for the demo. All submitted requests appear in
+            the shared list.
+          </p>
+        </aside>
         <div className="mt-10">
           <ServiceRequestList refreshCount={refreshCount} />
         </div>
@@ -36,8 +51,8 @@ function App() {
             Submit a service request
           </h1>
           <p className="mt-3 text-sm leading-6 text-slate-600">
-            Tell us what you need help with. Include a few details so our team
-            can understand the issue.
+            Try the form with a fictional service issue. Include a few made-up
+            details to demonstrate the request workflow.
           </p>
         </div>
 

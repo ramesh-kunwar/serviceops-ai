@@ -1,0 +1,75 @@
+name: ServiceOps CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Code Quality and Tests
+
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+
+        env:
+          POSTGRES_USER: serviceops
+          POSTGRES_PASSWORD: ci_test_password
+          POSTGRES_DB: serviceops_test
+
+        ports:
+          - 5432:5432
+
+        options: >-
+          --health-cmd "pg_isready -U serviceops -d serviceops_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://serviceops:ci_test_password@localhost:5432/serviceops_test
+      TEST_DATABASE_URL: postgresql://serviceops:ci_test_password@localhost:5432/serviceops_test
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check formatting
+        run: pnpm format:check
+
+      - name: Run ESLint
+        run: pnpm lint
+
+      - name: Check TypeScript
+        run: pnpm check-types
+
+      - name: Run database migrations
+        run: pnpm --filter @repo/api db:migrate
+
+      - name: Run tests
+        run: pnpm -r --if-present test
+
+      - name: Build applications
+        run: pnpm build
