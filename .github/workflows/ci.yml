@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - main
+      - feature/setup-ci
 
 permissions:
   contents: read
