@@ -23,6 +23,9 @@ services:
       start_period: 10s
 
   api:
+  build:
+    context: .
+    dockerfile: apps/api/Dockerfile
     image: serviceops-api:local
 
     environment:
